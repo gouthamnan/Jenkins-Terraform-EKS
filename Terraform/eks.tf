@@ -1,0 +1,47 @@
+module "eks" {
+    source = "terraform-aws-modules/eks/aws"
+    version = "19.15.1"
+
+    cluster_name = local.name
+    cluster_endpoint_public_access = true
+    
+    cluster_addons = {
+        coredns = {
+            most_recent = true
+        }
+    kube-proxy = {
+        most_recent = true
+    }
+    vpc-cni = {
+        most_recent = true
+    }
+
+    vpc_id = module.vpc.vpc_id
+    subnets_ids = module/vpc.private_subnets_tags
+    controle_plane_subnets_ids = module.vpc.intra_subnets
+    
+    eks_managed_node_group-defaults = {
+        ami_type = "AL2_x86_64"
+        instance_types = ["m5.large]
+
+        attache_cluster_primary_secruity_group = true
+    }
+    
+    eks_managed_node_group = {
+        kk-cluster-wg = {
+            min_size = 1 
+            max_size = 2
+            desired_size = 1 
+
+            instance_type = ["t3.large"]
+            capacity_type = "SPOT"
+
+            tags = {
+                Extratag = "Goan EKS"
+            }
+        }
+    }
+
+    tags = local.tags
+    }
+}
